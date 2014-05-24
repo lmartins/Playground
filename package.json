@@ -6,7 +6,7 @@
   "devDependencies": {
     "component": "^0.19.9",
     "component-coffee": "^0.1.4",
-    "gulp": "~3.6.2",
+    "gulp": "^3.6.2",
     "gulp-autoprefixer": "0.0.7",
     "gulp-changed": "^0.3.0",
     "gulp-coffee": "~1.4.3",
@@ -19,6 +19,8 @@
     "gulp-sass": "~0.7.1",
     "gulp-uglify": "^0.3.0",
     "gulp-util": "~2.2.14",
-    "gulp-watch": "^0.6.4"
+    "gulp-watch": "^0.6.4",
+    "lodash": "^2.4.1",
+    "webpack": "^1.2.0-beta2"
   }
 }

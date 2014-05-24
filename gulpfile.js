@@ -8,6 +8,8 @@ var gulp            = require('gulp'),
     coffeelint      = require('gulp-coffeelint'),
     component       = require('gulp-component'),
     componentcoffee = require('component-coffee'),
+    webpack         = require('webpack'),
+    webpackConfig   = require("./webpack.config.js"),
     plumber         = require('gulp-plumber'),
     changed         = require('gulp-changed'),
     uglify          = require('gulp-uglify'),
@@ -19,6 +21,11 @@ var options = {
 
   COFFEE: {
     src: ["src/coffee/**/*.coffee"],
+    build: "build/js/"
+  },
+
+  JS: {
+    src: ["src/JS/**/*.js"],
     build: "build/js/"
   },
 
@@ -90,6 +97,27 @@ gulp.task('coffee', function () {
 
 
 
+// WEBPACK ------------------------------------------------------------------
+// modify some webpack config options
+var myDevConfig = Object.create(webpackConfig);
+myDevConfig.devtool = "sourcemap";
+myDevConfig.debug = true;
+
+// create a single instance of the compiler to allow caching
+var devCompiler = webpack(myDevConfig);
+
+gulp.task("webpack:build-dev", function() {
+	// run webpack
+	devCompiler.run(function(err, stats) {
+		if(err) throw new gutil.PluginError("webpack:build-dev", err);
+		gutil.log("[webpack:build-dev]", stats.toString({
+			colors: true
+		}));
+	});
+
+});
+
+
 // COMPONENT ------------------------------------------------------------------
 gulp.task('component-js', function () {
   gulp.src( options.COMPONENT.manifest )
@@ -151,6 +179,7 @@ gulp.task('component', [ 'component-js', 'component-css' ]);
 gulp.task('watch', function () {
   gulp.watch( options.HTML.src , ['html']);
   gulp.watch( options.COFFEE.src , ['coffee']);
+  gulp.watch( options.JS.src , ["webpack:build-dev"]);
   gulp.watch( [options.COMPONENT.manifest, options.COMPONENT.src] , ['component-js', 'component-css']);
   // gulp.watch(options.IMAGE_SOURCE, ['images']);
   gulp.watch( options.HTML.src , ['html']  );
