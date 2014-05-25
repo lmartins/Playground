@@ -1,7 +1,11 @@
 "use strict";
 
 var      _ = require('lodash'),
+// dom     = require('dom'),
+Vue = require('vue'),
 classes    = require('./classes');
+
+var VM = new Vue();
 
 
 var add2 = function (x) {

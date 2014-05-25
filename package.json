@@ -6,6 +6,7 @@
   "devDependencies": {
     "component": "^0.19.9",
     "component-coffee": "^0.1.4",
+    "component-webpack-plugin": "^0.2.1",
     "gulp": "^3.6.2",
     "gulp-autoprefixer": "0.0.7",
     "gulp-changed": "^0.3.0",
