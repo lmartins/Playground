@@ -47,73 +47,47 @@
 
 	"use strict";
 	
-	var _   = __webpack_require__(1),
-	moduleA = __webpack_require__(3);
+	var      _ = __webpack_require__(1),
+	classes    = __webpack_require__(3);
 	
-	var country, weather, food, currency, cars, message;
-	country = "England";
 	
-	var personObj = {
-	  name: "Luis",
-	  age: 35
-	}
-	
-	console.log(_.forIn(personObj));
-	
-	if (country === 'England') {
-	  weather = 'horrible';
-	  food = 'filling';
-	  currency = 'pound sterling';
-	}
-	
-	if (country === 'France') {
-	  weather = 'nice';
-	  food = 'stunning, but hardly ever vegeterian';
-	  currency = 'funny, small and colourful';
-	}
-	
-	if (country === 'Germany') {
-	  weather = 'average';
-	  food = 'wurst thing ever';
-	  currency = 'funny, small and colourful';
-	}
-	
-	message = 'this is ' + country + ', where the weather is ' + weather + ', the food is ' + food + ' and the currency is ' + currency;
-	
-	// console.log(message);
-	
-	cars = [
-	  'Audi',
-	  'BMW',
-	  'Mercedes',
-	  'Opel',
-	  'Seat'
-	];
-	
-	_.each(cars, function(brand){
-	  console.log("Make: " + brand);
-	});
-	
-	// for (var i = 0; i < cars.length; i++) {
-	//   var brand = cars[i];
-	//   console.log(brand);
-	// }
-	// var keys = [];
-	// for (var k in cars){
-	//   keys.unshift(k);
-	// }
-	// for (var i = 0; i < keys.length; i++) {
-	//   console.log(cars[keys[i]]);
-	// }
-	// function showName() {
-	//   var name = "John Doe";
-	//   console.log(name);
-	// }
-	var showName = function() {
-	  var name = "John Doe";
-	  console.log(name);
+	var add2 = function (x) {
+	  return x + 2;
 	};
-	// showName();
+	
+	var double = function (x) {
+	  return x * 2;
+	};
+	
+	var map = function (func, list) {
+	  var output = [];
+	  for (var idx in list) {
+	    output.push( func(list[idx]) );
+	  }
+	  return output;
+	}
+	
+	
+	var buildProcessor = function (func) {
+	  var processFunc = function (list) {
+	    return map(func, list);
+	  };
+	  return processFunc;
+	};
+	
+	var buildMultiplier = function (x) {
+	  return function(y) {
+	    return x * y;
+	  };
+	};
+	
+	var processAdd2 = buildProcessor( add2 );
+	var processDouble = buildProcessor( double );
+	
+	console.log( processAdd2([5, 6, 7]) );
+	console.log( processDouble( [12, 164, 320] ) );
+	var double = buildMultiplier(2);
+	var triple = buildMultiplier(3);
 	
 	
 	// TODO: ver erro 404
@@ -121,10 +95,62 @@
 	//     var b = require("./moduleB");
 	// });
 	
-	var teste = _.map([1,2,3], function(value){
-	  return value % 3 === 0
-	})
-	console.log(teste);
+	var add1 = function (x) {
+	  return x + 1;
+	};
+	var negate = function (func) {
+	  return function(x){
+	    return -1 * func(x);
+	  }
+	};
+	
+	console.log( negate(add1)(5) );
+	
+	var language = {
+	  name: 'Javascript',
+	  isSupportedByBrowsers: true,
+	  createdIn: 1995,
+	  author: {
+	    firstName: 'Brendan',
+	    lastName: 'Eich'
+	  },
+	  getAuthorFullName: function () {
+	    return this.author.firstName + this.author.lastName;
+	  }
+	};
+	
+	var fruit = {
+	    apple: 2,
+	    orange: 5,
+	    pear: 1
+	  },
+	  sentence = "I have ",
+	  quantity;
+	
+	for (var kind in fruit) {
+	  if (fruit.hasOwnProperty(kind)) {
+	    quantity = fruit[kind];
+	    sentence += quantity + ' ' + kind + (quantity === 1 ? '' : 's') + ', ';
+	  }
+	}
+	sentence = sentence.substr(0, sentence.length-2) + '.';
+	console.log(sentence);
+	
+	var toggleActiveItem = function ToggleActiveItem (element) {
+	  element.classList.remove('active');
+	};
+	
+	var listItems = document.querySelectorAll('.mainMenu li');
+	console.log(listItems);
+	var activeListItems = _.filter(listItems, function(item){
+	  return item.classList.contains('active');
+	});
+	// console.log(activeListItems);
+	_.each(activeListItems, function(item) {
+	  item.classList.remove('active');
+	});
+	
+	_.each(activeListItems, toggleActiveItem );
 
 
 /***/ },
@@ -7311,8 +7337,28 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	'use strict'
-	console.log("this is module A");
+	var Animal;
+	
+	Animal = (function() {
+	  function Animal(name) {
+	    this.name = name;
+	  }
+	
+	  Animal.prototype.move = function(meters) {
+	    return this.name + (" moved " + meters + "m.");
+	  };
+	
+	  Animal.prototype.sayName = function () {
+	    return "Hello there, im " + this.name;
+	  };
+	
+	  return Animal;
+	
+	})();
+	
+	var sam = new Animal("Sammy the Python");
+	console.log(sam.move(5));
+	console.log(sam.sayName());
 
 
 /***/ }

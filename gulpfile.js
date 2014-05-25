@@ -26,7 +26,7 @@ var options = {
 
   JS: {
     src: ["src/JS/**/*.js"],
-    build: "build/js/"
+    build: "build/js/*.js"
   },
 
   COMPONENT: {
@@ -117,6 +117,11 @@ gulp.task("webpack:build-dev", function() {
 
 });
 
+gulp.task('js', function () {
+  gulp.src( options.JS.build )
+    .pipe(connect.reload());
+});
+
 
 // COMPONENT ------------------------------------------------------------------
 gulp.task('component-js', function () {
@@ -180,6 +185,7 @@ gulp.task('watch', function () {
   gulp.watch( options.HTML.src , ['html']);
   gulp.watch( options.COFFEE.src , ['coffee']);
   gulp.watch( options.JS.src , ["webpack:build-dev"]);
+  gulp.watch( options.JS.build , ["js"]);
   gulp.watch( [options.COMPONENT.manifest, options.COMPONENT.src] , ['component-js', 'component-css']);
   // gulp.watch(options.IMAGE_SOURCE, ['images']);
   gulp.watch( options.HTML.src , ['html']  );
