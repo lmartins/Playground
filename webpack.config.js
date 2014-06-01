@@ -1,5 +1,4 @@
 var ComponentPlugin = require("component-webpack-plugin");
-
 module.exports = {
     entry: "./src/js/main.js",
     output: {

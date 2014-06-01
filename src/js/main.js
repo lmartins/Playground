@@ -1,12 +1,13 @@
 "use strict";
 
-var      _ = require('lodash'),
-// dom     = require('dom'),
-Vue = require('vue'),
-classes    = require('./classes');
+var      _    = require('lodash'),
+    // dom       = require('dom'),
+    greetings = require('./greetings');
+// Vue     = require('vue'),
+// classes    = require('./classes');
 
-var VM = new Vue();
-
+console.log( greetings.sayHelloinEnglish() );
+console.log( greetings.sayHelloInSpanish() );
 
 var add2 = function (x) {
   return x + 2;
@@ -22,7 +23,7 @@ var map = function (func, list) {
     output.push( func(list[idx]) );
   }
   return output;
-}
+};
 
 
 var buildProcessor = function (func) {
@@ -58,7 +59,7 @@ var add1 = function (x) {
 var negate = function (func) {
   return function(x){
     return -1 * func(x);
-  }
+  };
 };
 
 console.log( negate(add1)(5) );
