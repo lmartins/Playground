@@ -6,6 +6,6 @@
   "local": [],
   "dependencies": {
     "component/dom": "*",
-    "yyx990803/vue": "*"
+    "ForbesLindesay/ajax": "*"
   }
 }
