@@ -5,8 +5,8 @@ var gulp            = require('gulp'),
     sass            = require('gulp-sass'),
     prefix          = require('gulp-autoprefixer'),
     component       = require('gulp-component'),
-    componentcoffee = require('component-coffee'),
     webpack         = require('webpack'),
+    ComponentPlugin = require("component-webpack-plugin"),
     webpackConfig   = require("./webpack.config.js"),
     webpackCompiler,
     plumber         = require('gulp-plumber'),
@@ -21,7 +21,7 @@ var gulp            = require('gulp'),
 var config = {
 
   JS: {
-    src: ["src/JS/**/*.js"],
+    src: ["src/js/**/*.js"],
     build: "build/js/",
     buildfiles: "build/js/*.js"
   },
@@ -147,29 +147,6 @@ gulp.task('component-css', function () {
 })
 
 
-// BOWER ----------------------------------------------------------------------
-gulp.task ('bowerCopy', function () {
-  gulp.src ([
-      'src/vendor/jquery/dist/jquery.js',
-      'src/vendor/backbone/backbone.js',
-      'src/vendor/underscore/underscore.js'
-      ])
-    .pipe (uglify())
-    .pipe (gulp.dest( "build/vendor/" ))
-});
-
-gulp.task ('bowerMerge', function () {
-  gulp.src ([
-      'src/vendor/jquery-easing/jquery.easing.js'
-    ])
-    .pipe (concat ("bundle.js"))
-    .pipe (uglify())
-    .pipe (gulp.dest ("build/vendor/"))
-});
-
-gulp.task('bower', [ 'bowerCopy', 'bowerMerge' ]);
-
-
 
 // HTML -----------------------------------------------------------------------
 gulp.task('html', function () {
@@ -202,7 +179,14 @@ gulp.task('set-env-dev', function() {
         $: 'jquery',
         jQuery: 'jquery',
       }),
-    ]
+      new ComponentPlugin()
+    ],
+    module: {
+        loaders: [
+            // { test: /\.css$/, loader: "style!css" }
+            { test: /\.json$/, loader: "json" }
+        ]
+    }
   };
   webpackCompiler = webpack(config.webpack);
 });
@@ -239,12 +223,13 @@ gulp.task('set-env-prod', function() {
 
 // GLOBAL TASKS ---------------------------------------------------------------
 
+// gulp.task('component', [ 'component-js', 'component-css' ]);
+
 gulp.task('watch', function () {
   gulp.watch( config.HTML.src , ['html']);
   gulp.watch( config.JS.src , ["webpack"]);
   gulp.watch( config.JS.buildfiles , ["js"]);
   gulp.watch( [config.COMPONENT.manifest, config.COMPONENT.src] , ['component-js', 'component-css']);
-  // gulp.watch(config.IMAGE_SOURCE, ['images']);
   gulp.watch( config.SASS.src , ['sass']  );
 });
 

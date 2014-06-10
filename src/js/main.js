@@ -2,11 +2,15 @@
 
 var //dom       = require('dom'),
     // ajax = require('ajax'),
+    _ = require('lodash'),
     greetings = require('./greetings'),
     maps      = require('./maps');
 
 maps.filters.init();
 
+function $(a,b){
+  return(b||document)['querySelector'+(b=/\:first$/,b.test(a)?'':'All')](a.replace(b,''));
+}
 
 var request = new XMLHttpRequest();
 request.open('GET', '/my/url', true);
@@ -24,5 +28,7 @@ request.onload = function() {
 request.onerror = function() {
   // There was a connection error of some sort
 };
+// request.send();
 
-request.send();
+var listItems = _.first($('li.active'));
+listItems.classList.add('picked');
