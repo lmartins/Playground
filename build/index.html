@@ -7,7 +7,8 @@
   </head>
   <body>
     <div class="Page">
-      <div class="UserCard" id="usercard" v-demo="LightSlateGray : msg" ></div>
+      <div class="Sidebar">Sidebar</div>
+      <div class="UserCard" id="usercard" v-demo="LightSlateGray : msg" >teste</div>
       <ul class="vueEl Todos" id="todos">
         <li
           v-repeat="todos"
@@ -20,6 +21,22 @@
           </div>
         </li>
       </ul>
+
+      <ul class="Todos modalContent u-hide" id="modalContent">
+        <li
+          v-repeat="todos"
+          v-on="click: done = !done"
+          class="Todos-item {{ done ? 'done' : '' }}"
+          >
+          {{$index}} - {{content}}
+          <div class="tags">
+            <span v-repeat="tag: tags">{{tag}}</span>
+          </div>
+        </li>
+      </ul>
+
+      <button class="toggleSibebar">Toggle Sidebar</button>
+      <button class="toggleModal">Toggle Modal</button>
     </div>
     <script src="js/main.bundle.js" type="text/javascript"></script>
   </body>

@@ -1,6 +1,6 @@
 /*!
  * Playground
- * 0.1.0:1403443237969 [development build]
+ * 0.1.0:1403465268768 [development build]
  */
 /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
@@ -51,11 +51,43 @@
 	'use strict';
 	
 	var
-	  _     = __webpack_require__(1),
-	  query = __webpack_require__(3),
-	  store = __webpack_require__(4),
-	  Vue   = __webpack_require__(5);
+	  _        = __webpack_require__(1),
+	  query    = __webpack_require__(3),
+	  store    = __webpack_require__(5),
+	  sheet    = __webpack_require__(7),
+	  modal    = __webpack_require__(14),
+	  Vue      = __webpack_require__(58);
 	
+	var el = query('.Sidebar');
+	var sidebar = sheet(el);
+	
+	// var button = query('.toggleSibebar');
+	query('.toggleSibebar').addEventListener('click', function(e) {
+	  sidebar.show();
+	});
+	
+	var tasksModal = modal( query('.modalContent') )
+	  .effect('fade-and-scale')
+	  .closable()
+	  .overlay();
+	
+	query('.toggleModal').addEventListener('click', function(e) {
+	  tasksModal.show();
+	  if (!window.vm2) {
+	    console.log("Run");
+	    window.vm2 = new Vue({
+	      el: '#modalContent',
+	      data: {
+	        title: 'todos',
+	        user: {
+	          firstName: user.name
+	        },
+	        todos: todosList
+	      }
+	    });
+	  }
+	
+	});
 	
 	var todosList = [
 	  {
@@ -71,8 +103,15 @@
 	];
 	
 	store.set('user', { name: 'Luis', likes: 'Javascript' });
-	
 	var user = store.get('user');
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	var vm = new Vue({
 	  el: '#todos',
@@ -7307,13 +7346,34 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(34);
+	module.exports = __webpack_require__(4);
 
 /***/ },
 /* 4 */
 /***/ function(module, exports, __webpack_require__) {
 
-	module.exports = __webpack_require__(33);
+	function one(selector, el) {
+	  return el.querySelector(selector);
+	}
+	
+	exports = module.exports = function(selector, el){
+	  el = el || document;
+	  return one(selector, el);
+	};
+	
+	exports.all = function(selector, el){
+	  el = el || document;
+	  return el.querySelectorAll(selector);
+	};
+	
+	exports.engine = function(obj){
+	  if (!obj.one) throw new Error('.one callback required');
+	  if (!obj.all) throw new Error('.all callback required');
+	  one = obj.one;
+	  exports.all = obj.all;
+	  return exports;
+	};
+
 
 /***/ },
 /* 5 */
@@ -7325,20 +7385,1806 @@
 /* 6 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var config      = __webpack_require__(7),
-	    ViewModel   = __webpack_require__(10),
-	    utils       = __webpack_require__(14),
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {;(function(win){
+		var store = {},
+			doc = win.document,
+			localStorageName = 'localStorage',
+			scriptTag = 'script',
+			storage
+	
+		store.disabled = false
+		store.set = function(key, value) {}
+		store.get = function(key) {}
+		store.remove = function(key) {}
+		store.clear = function() {}
+		store.transact = function(key, defaultVal, transactionFn) {
+			var val = store.get(key)
+			if (transactionFn == null) {
+				transactionFn = defaultVal
+				defaultVal = null
+			}
+			if (typeof val == 'undefined') { val = defaultVal || {} }
+			transactionFn(val)
+			store.set(key, val)
+		}
+		store.getAll = function() {}
+		store.forEach = function() {}
+	
+		store.serialize = function(value) {
+			return JSON.stringify(value)
+		}
+		store.deserialize = function(value) {
+			if (typeof value != 'string') { return undefined }
+			try { return JSON.parse(value) }
+			catch(e) { return value || undefined }
+		}
+	
+		// Functions to encapsulate questionable FireFox 3.6.13 behavior
+		// when about.config::dom.storage.enabled === false
+		// See https://github.com/marcuswestin/store.js/issues#issue/13
+		function isLocalStorageNameSupported() {
+			try { return (localStorageName in win && win[localStorageName]) }
+			catch(err) { return false }
+		}
+	
+		if (isLocalStorageNameSupported()) {
+			storage = win[localStorageName]
+			store.set = function(key, val) {
+				if (val === undefined) { return store.remove(key) }
+				storage.setItem(key, store.serialize(val))
+				return val
+			}
+			store.get = function(key) { return store.deserialize(storage.getItem(key)) }
+			store.remove = function(key) { storage.removeItem(key) }
+			store.clear = function() { storage.clear() }
+			store.getAll = function() {
+				var ret = {}
+				store.forEach(function(key, val) {
+					ret[key] = val
+				})
+				return ret
+			}
+			store.forEach = function(callback) {
+				for (var i=0; i<storage.length; i++) {
+					var key = storage.key(i)
+					callback(key, store.get(key))
+				}
+			}
+		} else if (doc.documentElement.addBehavior) {
+			var storageOwner,
+				storageContainer
+			// Since #userData storage applies only to specific paths, we need to
+			// somehow link our data to a specific path.  We choose /favicon.ico
+			// as a pretty safe option, since all browsers already make a request to
+			// this URL anyway and being a 404 will not hurt us here.  We wrap an
+			// iframe pointing to the favicon in an ActiveXObject(htmlfile) object
+			// (see: http://msdn.microsoft.com/en-us/library/aa752574(v=VS.85).aspx)
+			// since the iframe access rules appear to allow direct access and
+			// manipulation of the document element, even for a 404 page.  This
+			// document can be used instead of the current document (which would
+			// have been limited to the current path) to perform #userData storage.
+			try {
+				storageContainer = new ActiveXObject('htmlfile')
+				storageContainer.open()
+				storageContainer.write('<'+scriptTag+'>document.w=window</'+scriptTag+'><iframe src="/favicon.ico"></iframe>')
+				storageContainer.close()
+				storageOwner = storageContainer.w.frames[0].document
+				storage = storageOwner.createElement('div')
+			} catch(e) {
+				// somehow ActiveXObject instantiation failed (perhaps some special
+				// security settings or otherwse), fall back to per-path storage
+				storage = doc.createElement('div')
+				storageOwner = doc.body
+			}
+			function withIEStorage(storeFunction) {
+				return function() {
+					var args = Array.prototype.slice.call(arguments, 0)
+					args.unshift(storage)
+					// See http://msdn.microsoft.com/en-us/library/ms531081(v=VS.85).aspx
+					// and http://msdn.microsoft.com/en-us/library/ms531424(v=VS.85).aspx
+					storageOwner.appendChild(storage)
+					storage.addBehavior('#default#userData')
+					storage.load(localStorageName)
+					var result = storeFunction.apply(store, args)
+					storageOwner.removeChild(storage)
+					return result
+				}
+			}
+	
+			// In IE7, keys cannot start with a digit or contain certain chars.
+			// See https://github.com/marcuswestin/store.js/issues/40
+			// See https://github.com/marcuswestin/store.js/issues/83
+			var forbiddenCharsRegex = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
+			function ieKeyFix(key) {
+				return key.replace(/^d/, '___$&').replace(forbiddenCharsRegex, '___')
+			}
+			store.set = withIEStorage(function(storage, key, val) {
+				key = ieKeyFix(key)
+				if (val === undefined) { return store.remove(key) }
+				storage.setAttribute(key, store.serialize(val))
+				storage.save(localStorageName)
+				return val
+			})
+			store.get = withIEStorage(function(storage, key) {
+				key = ieKeyFix(key)
+				return store.deserialize(storage.getAttribute(key))
+			})
+			store.remove = withIEStorage(function(storage, key) {
+				key = ieKeyFix(key)
+				storage.removeAttribute(key)
+				storage.save(localStorageName)
+			})
+			store.clear = withIEStorage(function(storage) {
+				var attributes = storage.XMLDocument.documentElement.attributes
+				storage.load(localStorageName)
+				for (var i=0, attr; attr=attributes[i]; i++) {
+					storage.removeAttribute(attr.name)
+				}
+				storage.save(localStorageName)
+			})
+			store.getAll = function(storage) {
+				var ret = {}
+				store.forEach(function(key, val) {
+					ret[key] = val
+				})
+				return ret
+			}
+			store.forEach = withIEStorage(function(storage, callback) {
+				var attributes = storage.XMLDocument.documentElement.attributes
+				for (var i=0, attr; attr=attributes[i]; ++i) {
+					callback(attr.name, store.deserialize(storage.getAttribute(attr.name)))
+				}
+			})
+		}
+	
+		try {
+			var testKey = '__storejs__'
+			store.set(testKey, testKey)
+			if (store.get(testKey) != testKey) { store.disabled = true }
+			store.remove(testKey)
+		} catch(e) {
+			store.disabled = true
+		}
+		store.enabled = !store.disabled
+	
+		if (typeof module != 'undefined' && module.exports && this.module !== module) { module.exports = store }
+		else if (true) { !(__WEBPACK_AMD_DEFINE_FACTORY__ = (store), (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_RESULT__ = __WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : module.exports = __WEBPACK_AMD_DEFINE_FACTORY__)) }
+		else { win.store = store }
+	
+	})(Function('return this')());
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(8);
+	module.exports = __webpack_require__(11);
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	__webpack_require__(9)
+		// The css code:
+		(__webpack_require__(10))
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/*
+		MIT License http://www.opensource.org/licenses/mit-license.php
+		Author Tobias Koppers @sokra
+	*/
+	module.exports = function(cssCode) {
+		var styleElement = document.createElement("style");
+		styleElement.type = "text/css";
+		if (styleElement.styleSheet) {
+			styleElement.styleSheet.cssText = cssCode;
+		} else {
+			styleElement.appendChild(document.createTextNode(cssCode));
+		}
+		document.getElementsByTagName("head")[0].appendChild(styleElement);
+	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports =
+		"\n/**\n * Sheet.\n\n *   .sheet\n *     .sheet-close-button\n *     [content]\n */\n\n .Sheet {\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  bottom: 0;\n  background: white;\n}\n\n\n/**\n * Modal effect\n */\n\n.Modal[effect=\"sheet-right\"],\n.Modal[effect=\"sheet-left\"] {\n  position: fixed;\n  top: 0;\n  bottom: 0;\n  width: 60%;\n  z-index: 1001;\n  -webkit-transition: -webkit-transform .3s;\n  transition: transform .3s;\n  max-width: none;\n  -webkit-transform: translateX(0%);\n  -moz-transform: translateX(0%);\n  transform: translateX(0%);\n}\n\n\n/**\n * Right-aligned.\n */\n\n.Modal[effect=\"sheet-right\"] {\n  right: 0;\n  left: auto;\n}\n\n.Modal[effect=\"sheet-right\"].hidden {\n  -webkit-transform: translate3d(110%,0,0);\n  -moz-transform: translate3d(110%,0,0);\n  transform: translate3d(100%,0,0);\n}\n\n/**\n * Left-aligned.\n */\n\n.Modal[effect=\"sheet-left\"]  {\n  left: 0;\n  right: auto;\n}\n\n.Modal[effect=\"sheet-left\"].hidden {\n  -webkit-transform: translate3d(-110%,0,0);\n  -moz-transform: translate3d(-110%,0,0);\n  transform: translate3d(-110%,0,0);\n}\n";
+
+/***/ },
+/* 11 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var domify = __webpack_require__(12);
+	var modal = __webpack_require__(14);
+	var template = __webpack_require__(51);
+	var delegate = __webpack_require__(52);
+	var classes = __webpack_require__(40);
+	
+	
+	/**
+	 * Expose `Sheet`.
+	 */
+	
+	module.exports = Sheet;
+	
+	
+	/**
+	 * Initialize a new `Sheet`.
+	 *
+	 * @param {Element} content
+	 */
+	
+	function Sheet (content) {
+	  if (!(this instanceof Sheet)) return new Sheet(content);
+	  this.el = domify(template);
+	  this.el.appendChild(content);
+	  this.modal = modal(this.el)
+	    .overlay()
+	    .closable();
+	  this.align('right');
+	  delegate.bind(this.el, '[on-click="hide"]', 'click', this.hide.bind(this), true);
+	}
+	
+	
+	/**
+	 * Mixins
+	 */
+	
+	classes(Sheet.prototype);
+	
+	
+	/**
+	 * Set the sheet's alignment.
+	 *
+	 * @param {String} side (left or right)
+	 * @return {Sheet}
+	 */
+	
+	Sheet.prototype.align = function (side) {
+	  this.modal.effect('sheet-' + side);
+	  return this;
+	};
+	
+	
+	/**
+	 * Show the sheet.
+	 *
+	 * @return {Sheet}
+	 */
+	Sheet.prototype.show = function(){
+	  this.modal.show();
+	  return this;
+	};
+	
+	
+	/**
+	 * Hide the sheet.
+	 *
+	 * @return {Sheet}
+	 */
+	Sheet.prototype.hide = function(){
+	  this.modal.hide();
+	  return this;
+	};
+
+/***/ },
+/* 12 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(13);
+
+/***/ },
+/* 13 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * Expose `parse`.
+	 */
+	
+	module.exports = parse;
+	
+	/**
+	 * Wrap map from jquery.
+	 */
+	
+	var map = {
+	  legend: [1, '<fieldset>', '</fieldset>'],
+	  tr: [2, '<table><tbody>', '</tbody></table>'],
+	  col: [2, '<table><tbody></tbody><colgroup>', '</colgroup></table>'],
+	  _default: [0, '', '']
+	};
+	
+	map.td =
+	map.th = [3, '<table><tbody><tr>', '</tr></tbody></table>'];
+	
+	map.option =
+	map.optgroup = [1, '<select multiple="multiple">', '</select>'];
+	
+	map.thead =
+	map.tbody =
+	map.colgroup =
+	map.caption =
+	map.tfoot = [1, '<table>', '</table>'];
+	
+	map.text =
+	map.circle =
+	map.ellipse =
+	map.line =
+	map.path =
+	map.polygon =
+	map.polyline =
+	map.rect = [1, '<svg xmlns="http://www.w3.org/2000/svg" version="1.1">','</svg>'];
+	
+	/**
+	 * Parse `html` and return the children.
+	 *
+	 * @param {String} html
+	 * @return {Array}
+	 * @api private
+	 */
+	
+	function parse(html) {
+	  if ('string' != typeof html) throw new TypeError('String expected');
+	  
+	  // tag name
+	  var m = /<([\w:]+)/.exec(html);
+	  if (!m) return document.createTextNode(html);
+	
+	  html = html.replace(/^\s+|\s+$/g, ''); // Remove leading/trailing whitespace
+	
+	  var tag = m[1];
+	
+	  // body support
+	  if (tag == 'body') {
+	    var el = document.createElement('html');
+	    el.innerHTML = html;
+	    return el.removeChild(el.lastChild);
+	  }
+	
+	  // wrap map
+	  var wrap = map[tag] || map._default;
+	  var depth = wrap[0];
+	  var prefix = wrap[1];
+	  var suffix = wrap[2];
+	  var el = document.createElement('div');
+	  el.innerHTML = prefix + html + suffix;
+	  while (depth--) el = el.lastChild;
+	
+	  // one element
+	  if (el.firstChild == el.lastChild) {
+	    return el.removeChild(el.firstChild);
+	  }
+	
+	  // several elements
+	  var fragment = document.createDocumentFragment();
+	  while (el.firstChild) {
+	    fragment.appendChild(el.removeChild(el.firstChild));
+	  }
+	
+	  return fragment;
+	}
+
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(15);
+	module.exports = __webpack_require__(17);
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	__webpack_require__(9)
+		// The css code:
+		(__webpack_require__(16))
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports =
+		".Modal {\n  position: fixed;\n  opacity: 1;\n  z-index: 1001;\n  max-width: 500px;\n  top: 30%;\n  left: 50%;\n  -webkit-transform: translateX(-50%);\n  -moz-transform: translateX(-50%);\n  transform: translateX(-50%);\n}\n\n\n/**\n * So transitions actually work\n */\n\n.Modal.hidden {\n  display: block;\n}\n\n\n/**\n * Default show/hide effect\n */\n\n.Modal[effect=\"toggle\"].hidden {\n  display: none;\n}\n\n\n/**\n * Slide in from the bottom\n */\n\n.Modal[effect=\"slide-in-bottom\"] {\n  top: 30%;\n  left: 50%;\n  -webkit-transform: translateX(-50%) translateY(0);\n  -moz-transform: translateX(-50%) translateY(0);\n  transform: translateX(-50%) translateY(0);\n  transition: all .4s cubic-bezier(0.560, 0.185, 0.315, 1.150);\n}\n\n.Modal[effect=\"slide-in-bottom\"].hidden {\n  -webkit-transform: translateX(-50%) translateY(30%);\n  -moz-transform: translateX(-50%) translateY(30%);\n  transform: translateX(-50%) translateY(30%);\n  opacity: 0;\n}\n\n\n/**\n * Sticky-up\n */\n\n.Modal[effect=\"sticky-up\"] {\n  top: 0;\n  left: 50%;\n  -webkit-transform: translateX(-50%) translateY(0);\n  -moz-transform: translateX(-50%) translateY(0);\n  transform: translateX(-50%) translateY(0);\n  transition: all .4s ease-in-out;\n}\n\n.Modal[effect=\"sticky-up\"].hidden {\n  -webkit-transform: translateX(-50%) translateY(-100%);\n  -moz-transform: translateX(-50%) translateY(-100%);\n  transform: translateX(-50%) translateY(-100%);\n}\n\n\n/**\n * Fade in and scale up from the middle\n */\n\n.Modal[effect=\"fade-and-scale\"] {\n  top: 30%;\n  left: 50%;\n  -webkit-transform: translateX(-50%) translateY(0) scale(1);\n  -moz-transform: translateX(-50%) translateY(0) scale(1);\n  transform: translateX(-50%) translateY(0) scale(1);\n  transition: all .4s cubic-bezier(0.560, 0.185, 0.315, 1.150);\n}\n\n.Modal[effect=\"fade-and-scale\"].hidden {\n  -webkit-transform: translateX(-50%) translateY(0%) scale(0.5);\n  -moz-transform: translateX(-50%) translateY(0%) scale(0.5);\n  transform: translateX(-50%) translateY(0%) scale(0.5);\n  opacity: 0;\n}";
+
+/***/ },
+/* 17 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var domify = __webpack_require__(12);
+	var Emitter = __webpack_require__(18);
+	var overlay = __webpack_require__(20);
+	var onEscape = __webpack_require__(48);
+	var template = __webpack_require__(50);
+	var Showable = __webpack_require__(25);
+	var Classes = __webpack_require__(40);
+	
+	/**
+	 * Expose `Modal`.
+	 */
+	
+	module.exports = Modal;
+	
+	
+	/**
+	 * Initialize a new `Modal`.
+	 *
+	 * @param {Element} el The element to put into a modal
+	 */
+	
+	function Modal (el) {
+	  if (!(this instanceof Modal)) return new Modal(el);
+	  this.el = domify(template);
+	  this.el.appendChild(el);
+	  this._overlay = overlay();
+	
+	  var el = this.el;
+	
+	  this.on('showing', function(){
+	    document.body.appendChild(el);
+	  });
+	
+	  this.on('hide', function(){
+	    document.body.removeChild(el);
+	  });
+	}
+	
+	
+	/**
+	 * Mixin emitter.
+	 */
+	
+	Emitter(Modal.prototype);
+	Showable(Modal.prototype);
+	Classes(Modal.prototype);
+	
+	
+	/**
+	 * Set the transition in/out effect
+	 *
+	 * @param {String} type
+	 *
+	 * @return {Modal}
+	 */
+	
+	Modal.prototype.effect = function(type) {
+	  this.el.setAttribute('effect', type);
+	  return this;
+	};
+	
+	
+	/**
+	 * Add an overlay
+	 *
+	 * @param {Object} opts
+	 *
+	 * @return {Modal}
+	 */
+	
+	Modal.prototype.overlay = function(){
+	  var self = this;
+	  this.on('showing', function(){
+	    self._overlay.show();
+	  });
+	  this.on('hiding', function(){
+	    self._overlay.hide();
+	  });
+	  return this;
+	};
+	
+	
+	/**
+	 * Make the modal closeable.
+	 *
+	 * @return {Modal}
+	 */
+	
+	Modal.prototype.closeable =
+	Modal.prototype.closable = function () {
+	  var self = this;
+	
+	  function hide(){
+	    self.hide();
+	  }
+	
+	  this._overlay.on('click', hide);
+	  onEscape(hide);
+	  return this;
+	};
+
+/***/ },
+/* 18 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(19);
+
+/***/ },
+/* 19 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * Expose `Emitter`.
+	 */
+	
+	module.exports = Emitter;
+	
+	/**
+	 * Initialize a new `Emitter`.
+	 *
+	 * @api public
+	 */
+	
+	function Emitter(obj) {
+	  if (obj) return mixin(obj);
+	};
+	
+	/**
+	 * Mixin the emitter properties.
+	 *
+	 * @param {Object} obj
+	 * @return {Object}
+	 * @api private
+	 */
+	
+	function mixin(obj) {
+	  for (var key in Emitter.prototype) {
+	    obj[key] = Emitter.prototype[key];
+	  }
+	  return obj;
+	}
+	
+	/**
+	 * Listen on the given `event` with `fn`.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+	
+	Emitter.prototype.on =
+	Emitter.prototype.addEventListener = function(event, fn){
+	  this._callbacks = this._callbacks || {};
+	  (this._callbacks[event] = this._callbacks[event] || [])
+	    .push(fn);
+	  return this;
+	};
+	
+	/**
+	 * Adds an `event` listener that will be invoked a single
+	 * time then automatically removed.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+	
+	Emitter.prototype.once = function(event, fn){
+	  var self = this;
+	  this._callbacks = this._callbacks || {};
+	
+	  function on() {
+	    self.off(event, on);
+	    fn.apply(this, arguments);
+	  }
+	
+	  on.fn = fn;
+	  this.on(event, on);
+	  return this;
+	};
+	
+	/**
+	 * Remove the given callback for `event` or all
+	 * registered callbacks.
+	 *
+	 * @param {String} event
+	 * @param {Function} fn
+	 * @return {Emitter}
+	 * @api public
+	 */
+	
+	Emitter.prototype.off =
+	Emitter.prototype.removeListener =
+	Emitter.prototype.removeAllListeners =
+	Emitter.prototype.removeEventListener = function(event, fn){
+	  this._callbacks = this._callbacks || {};
+	
+	  // all
+	  if (0 == arguments.length) {
+	    this._callbacks = {};
+	    return this;
+	  }
+	
+	  // specific event
+	  var callbacks = this._callbacks[event];
+	  if (!callbacks) return this;
+	
+	  // remove all handlers
+	  if (1 == arguments.length) {
+	    delete this._callbacks[event];
+	    return this;
+	  }
+	
+	  // remove specific handler
+	  var cb;
+	  for (var i = 0; i < callbacks.length; i++) {
+	    cb = callbacks[i];
+	    if (cb === fn || cb.fn === fn) {
+	      callbacks.splice(i, 1);
+	      break;
+	    }
+	  }
+	  return this;
+	};
+	
+	/**
+	 * Emit `event` with the given args.
+	 *
+	 * @param {String} event
+	 * @param {Mixed} ...
+	 * @return {Emitter}
+	 */
+	
+	Emitter.prototype.emit = function(event){
+	  this._callbacks = this._callbacks || {};
+	  var args = [].slice.call(arguments, 1)
+	    , callbacks = this._callbacks[event];
+	
+	  if (callbacks) {
+	    callbacks = callbacks.slice(0);
+	    for (var i = 0, len = callbacks.length; i < len; ++i) {
+	      callbacks[i].apply(this, args);
+	    }
+	  }
+	
+	  return this;
+	};
+	
+	/**
+	 * Return array of callbacks for `event`.
+	 *
+	 * @param {String} event
+	 * @return {Array}
+	 * @api public
+	 */
+	
+	Emitter.prototype.listeners = function(event){
+	  this._callbacks = this._callbacks || {};
+	  return this._callbacks[event] || [];
+	};
+	
+	/**
+	 * Check if this emitter has `event` handlers.
+	 *
+	 * @param {String} event
+	 * @return {Boolean}
+	 * @api public
+	 */
+	
+	Emitter.prototype.hasListeners = function(event){
+	  return !! this.listeners(event).length;
+	};
+
+
+/***/ },
+/* 20 */
+/***/ function(module, exports, __webpack_require__) {
+
+	__webpack_require__(21);
+	module.exports = __webpack_require__(23);
+
+/***/ },
+/* 21 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// style-loader: Adds some css to the DOM by adding a <style> tag
+	__webpack_require__(9)
+		// The css code:
+		(__webpack_require__(22))
+
+/***/ },
+/* 22 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports =
+		"\n/**\n * Overlay\n *\n * div.Overlay[.hide]\n */\n\n.Overlay {\n  position: fixed;\n  top: 0;\n  right: 0;\n  bottom: 0;\n  left: 0;\n  z-index: 1000;\n}";
+
+/***/ },
+/* 23 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var template = __webpack_require__(24);
+	var domify = __webpack_require__(12);
+	var emitter = __webpack_require__(18);
+	var showable = __webpack_require__(25);
+	var classes = __webpack_require__(40);
+	
+	/**
+	 * Export `Overlay`
+	 */
+	module.exports = Overlay;
+	
+	
+	/**
+	 * Initialize a new `Overlay`.
+	 *
+	 * @param {Element} target The element to attach the overlay to
+	 * @api public
+	 */
+	
+	function Overlay(target) {
+	  if(!(this instanceof Overlay)) return new Overlay(target);
+	
+	  this.target = target || document.body;
+	  this.el = domify(template);
+	  this.el.addEventListener('click', this.handleClick.bind(this));
+	
+	  var el = this.el;
+	  var parent = this.target;
+	
+	  this.on('showing', function(){
+	    parent.appendChild(el);
+	  });
+	
+	  this.on('hide', function(){
+	    parent.removeChild(el);
+	  });
+	}
+	
+	
+	/**
+	 * When the overlay is click, emit an event so that
+	 * the view that is using this overlay can choose
+	 * to close the overlay if they want
+	 *
+	 * @param {Event} e
+	 */
+	Overlay.prototype.handleClick = function(e){
+	  this.emit('click', e);
+	};
+	
+	
+	/**
+	 * Mixins
+	 */
+	emitter(Overlay.prototype);
+	showable(Overlay.prototype);
+	classes(Overlay.prototype);
+
+/***/ },
+/* 24 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = "<div class=\"Overlay hidden\"></div>";
+
+/***/ },
+/* 25 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(26);
+
+/***/ },
+/* 26 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var after = __webpack_require__(27).once;
+	var nextTick = __webpack_require__(37);
+	
+	/**
+	 * Hide the view
+	 */
+	function hide(fn){
+	  var self = this;
+	
+	  if(this.hidden == null) {
+	    this.hidden = this.el.classList.contains('hidden');
+	  }
+	
+	  if(this.hidden || this.animating) return;
+	
+	  this.hidden = true;
+	  this.animating = true;
+	
+	  after(self.el, function(){
+	    self.animating = false;
+	    self.emit('hide');
+	    if(fn) fn();
+	  });
+	
+	  self.el.classList.add('hidden');
+	  this.emit('hiding');
+	  return this;
+	}
+	
+	/**
+	 * Show the view. This waits until after any transitions
+	 * are finished. It also removed the hide class on the next
+	 * tick so that the transition actually paints.
+	 */
+	function show(fn){
+	  var self = this;
+	
+	  if(this.hidden == null) {
+	    this.hidden = this.el.classList.contains('hidden');
+	  }
+	
+	  if(this.hidden === false || this.animating) return;
+	
+	  this.hidden = false;
+	  this.animating = true;
+	
+	  this.emit('showing');
+	
+	  after(self.el, function(){
+	    self.animating = false;
+	    self.emit('show');
+	    if(fn) fn();
+	  });
+	
+	  this.el.offsetHeight;
+	
+	  nextTick(function(){
+	    self.el.classList.remove('hidden');
+	  });
+	
+	  return this;
+	}
+	
+	/**
+	 * Mixin methods into the view
+	 *
+	 * @param {Emitter} obj
+	 */
+	module.exports = function(obj) {
+	  obj.hide = hide;
+	  obj.show = show;
+	  return obj;
+	};
+
+/***/ },
+/* 27 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(28);
+
+/***/ },
+/* 28 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * dependencies
+	 */
+	
+	var has = __webpack_require__(29)
+	  , emitter = __webpack_require__(31)
+	  , once = __webpack_require__(35);
+	
+	/**
+	 * Transition support.
+	 */
+	
+	var supported = has();
+	
+	/**
+	 * Export `after`
+	 */
+	
+	module.exports = after;
+	
+	/**
+	 * Invoke the given `fn` after transitions
+	 *
+	 * It will be invoked only if the browser
+	 * supports transitions __and__
+	 * the element has transitions
+	 * set in `.style` or css.
+	 *
+	 * @param {Element} el
+	 * @param {Function} fn
+	 * @return {Function} fn
+	 * @api public
+	 */
+	
+	function after(el, fn){
+	  if (!supported || !has(el)) return fn();
+	  emitter(el).bind(fn);
+	  return fn;
+	};
+	
+	/**
+	 * Same as `after()` only the function is invoked once.
+	 *
+	 * @param {Element} el
+	 * @param {Function} fn
+	 * @return {Function}
+	 * @api public
+	 */
+	
+	after.once = function(el, fn){
+	  var callback = once(fn);
+	  after(el, fn = function(){
+	    emitter(el).unbind(fn);
+	    callback();
+	  });
+	};
+
+
+/***/ },
+/* 29 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(30);
+
+/***/ },
+/* 30 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Check if `el` or browser supports transitions.
+	 *
+	 * @param {Element} el
+	 * @return {Boolean}
+	 * @api public
+	 */
+	
+	exports = module.exports = function(el){
+	  switch (arguments.length) {
+	    case 0: return bool;
+	    case 1: return bool
+	      ? transitions(el)
+	      : bool;
+	  }
+	};
+	
+	/**
+	 * Check if the given `el` has transitions.
+	 *
+	 * @param {Element} el
+	 * @return {Boolean}
+	 * @api private
+	 */
+	
+	function transitions(el, styl){
+	  if (el.transition) return true;
+	  styl = window.getComputedStyle(el);
+	  return !! parseFloat(styl.transitionDuration, 10);
+	}
+	
+	/**
+	 * Style.
+	 */
+	
+	var styl = document.body.style;
+	
+	/**
+	 * Export support.
+	 */
+	
+	var bool = 'transition' in styl
+	  || 'webkitTransition' in styl
+	  || 'MozTransition' in styl
+	  || 'msTransition' in styl;
+
+
+/***/ },
+/* 31 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(32);
+
+/***/ },
+/* 32 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Module Dependencies
+	 */
+	
+	var events = __webpack_require__(33);
+	
+	// CSS events
+	
+	var watch = [
+	  'transitionend'
+	, 'webkitTransitionEnd'
+	, 'oTransitionEnd'
+	, 'MSTransitionEnd'
+	, 'animationend'
+	, 'webkitAnimationEnd'
+	, 'oAnimationEnd'
+	, 'MSAnimationEnd'
+	];
+	
+	/**
+	 * Expose `CSSnext`
+	 */
+	
+	module.exports = CssEmitter;
+	
+	/**
+	 * Initialize a new `CssEmitter`
+	 *
+	 */
+	
+	function CssEmitter(element){
+	  if (!(this instanceof CssEmitter)) return new CssEmitter(element);
+	  this.el = element;
+	}
+	
+	/**
+	 * Bind CSS events.
+	 *
+	 * @api public
+	 */
+	
+	CssEmitter.prototype.bind = function(fn){
+	  for (var i=0; i < watch.length; i++) {
+	    events.bind(this.el, watch[i], fn);
+	  }
+	  return this;
+	};
+	
+	/**
+	 * Unbind CSS events
+	 * 
+	 * @api public
+	 */
+	
+	CssEmitter.prototype.unbind = function(fn){
+	  for (var i=0; i < watch.length; i++) {
+	    events.unbind(this.el, watch[i], fn);
+	  }
+	  return this;
+	};
+	
+	/**
+	 * Fire callback only once
+	 * 
+	 * @api public
+	 */
+	
+	CssEmitter.prototype.once = function(fn){
+	  var self = this;
+	  function on(){
+	    self.unbind(on);
+	    fn.apply(self.el, arguments);
+	  }
+	  self.bind(on);
+	  return this;
+	};
+	
+
+
+/***/ },
+/* 33 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(34);
+
+/***/ },
+/* 34 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var bind = window.addEventListener ? 'addEventListener' : 'attachEvent',
+	    unbind = window.removeEventListener ? 'removeEventListener' : 'detachEvent',
+	    prefix = bind !== 'addEventListener' ? 'on' : '';
+	
+	/**
+	 * Bind `el` event `type` to `fn`.
+	 *
+	 * @param {Element} el
+	 * @param {String} type
+	 * @param {Function} fn
+	 * @param {Boolean} capture
+	 * @return {Function}
+	 * @api public
+	 */
+	
+	exports.bind = function(el, type, fn, capture){
+	  el[bind](prefix + type, fn, capture || false);
+	
+	  return fn;
+	};
+	
+	/**
+	 * Unbind `el` event `type`'s callback `fn`.
+	 *
+	 * @param {Element} el
+	 * @param {String} type
+	 * @param {Function} fn
+	 * @param {Boolean} capture
+	 * @return {Function}
+	 * @api public
+	 */
+	
+	exports.unbind = function(el, type, fn, capture){
+	  el[unbind](prefix + type, fn, capture || false);
+	
+	  return fn;
+	};
+
+/***/ },
+/* 35 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(36);
+
+/***/ },
+/* 36 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * Identifier.
+	 */
+	
+	var n = 0;
+	
+	/**
+	 * Global.
+	 */
+	
+	var global = (function(){ return this })();
+	
+	/**
+	 * Make `fn` callable only once.
+	 *
+	 * @param {Function} fn
+	 * @return {Function}
+	 * @api public
+	 */
+	
+	module.exports = function(fn) {
+	  var id = n++;
+	  var called;
+	
+	  function once(){
+	    // no receiver
+	    if (this == global) {
+	      if (called) return;
+	      called = true;
+	      return fn.apply(this, arguments);
+	    }
+	
+	    // receiver
+	    var key = '__called_' + id + '__';
+	    if (this[key]) return;
+	    this[key] = true;
+	    return fn.apply(this, arguments);
+	  }
+	
+	  return once;
+	};
+
+
+/***/ },
+/* 37 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(38);
+
+/***/ },
+/* 38 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/* WEBPACK VAR INJECTION */(function(process) {"use strict"
+	
+	if (typeof setImmediate == 'function') {
+	  module.exports = function(f){ setImmediate(f) }
+	}
+	// legacy node.js
+	else if (typeof process != 'undefined' && typeof process.nextTick == 'function') {
+	  module.exports = process.nextTick
+	}
+	// fallback for other environments / postMessage behaves badly on IE8
+	else if (typeof window == 'undefined' || window.ActiveXObject || !window.postMessage) {
+	  module.exports = function(f){ setTimeout(f) };
+	} else {
+	  var q = [];
+	
+	  window.addEventListener('message', function(){
+	    var i = 0;
+	    while (i < q.length) {
+	      try { q[i++](); }
+	      catch (e) {
+	        q = q.slice(i);
+	        window.postMessage('tic!', '*');
+	        throw e;
+	      }
+	    }
+	    q.length = 0;
+	  }, true);
+	
+	  module.exports = function(fn){
+	    if (!q.length) window.postMessage('tic!', '*');
+	    q.push(fn);
+	  }
+	}
+	
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(39)))
+
+/***/ },
+/* 39 */
+/***/ function(module, exports, __webpack_require__) {
+
+	// shim for using process in browser
+	
+	var process = module.exports = {};
+	
+	process.nextTick = (function () {
+	    var canSetImmediate = typeof window !== 'undefined'
+	    && window.setImmediate;
+	    var canPost = typeof window !== 'undefined'
+	    && window.postMessage && window.addEventListener
+	    ;
+	
+	    if (canSetImmediate) {
+	        return function (f) { return window.setImmediate(f) };
+	    }
+	
+	    if (canPost) {
+	        var queue = [];
+	        window.addEventListener('message', function (ev) {
+	            var source = ev.source;
+	            if ((source === window || source === null) && ev.data === 'process-tick') {
+	                ev.stopPropagation();
+	                if (queue.length > 0) {
+	                    var fn = queue.shift();
+	                    fn();
+	                }
+	            }
+	        }, true);
+	
+	        return function nextTick(fn) {
+	            queue.push(fn);
+	            window.postMessage('process-tick', '*');
+	        };
+	    }
+	
+	    return function nextTick(fn) {
+	        setTimeout(fn, 0);
+	    };
+	})();
+	
+	process.title = 'browser';
+	process.browser = true;
+	process.env = {};
+	process.argv = [];
+	
+	function noop() {}
+	
+	process.on = noop;
+	process.addListener = noop;
+	process.once = noop;
+	process.off = noop;
+	process.removeListener = noop;
+	process.removeAllListeners = noop;
+	process.emit = noop;
+	
+	process.binding = function (name) {
+	    throw new Error('process.binding is not supported');
+	}
+	
+	// TODO(shtylman)
+	process.cwd = function () { return '/' };
+	process.chdir = function (dir) {
+	    throw new Error('process.chdir is not supported');
+	};
+
+
+/***/ },
+/* 40 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(41);
+
+/***/ },
+/* 41 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var classes = __webpack_require__(42);
+	
+	
+	/**
+	 * Expose `mixin`.
+	 */
+	
+	module.exports = exports = mixin;
+	
+	
+	/**
+	 * Mixin the classes methods.
+	 *
+	 * @param {Object} object
+	 * @return {Object}
+	 */
+	
+	function mixin (obj) {
+	  for (var method in exports) obj[method] = exports[method];
+	  return obj;
+	}
+	
+	
+	/**
+	 * Add a class.
+	 *
+	 * @param {String} name
+	 * @return {Object}
+	 */
+	
+	exports.addClass = function (name) {
+	  classes.add(name, this.el);
+	  return this;
+	};
+	
+	
+	/**
+	 * Remove a class.
+	 *
+	 * @param {String} name
+	 * @return {Object}
+	 */
+	
+	exports.removeClass = function (name) {
+	  classes.remove(name, this.el);
+	  return this;
+	};
+	
+	
+	/**
+	 * Has a class?
+	 *
+	 * @param {String} name
+	 * @return {Boolean}
+	 */
+	
+	exports.hasClass = function (name) {
+	  return classes.has(name, this.el);
+	};
+	
+	
+	/**
+	 * Toggle a class.
+	 *
+	 * @param {String} name
+	 * @return {Object}
+	 */
+	
+	exports.toggleClass = function (name) {
+	  classes.toggle(name, this.el);
+	  return this;
+	};
+
+
+/***/ },
+/* 42 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(43);
+
+/***/ },
+/* 43 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	module.exports = document.createElement('div').classList
+	  ? __webpack_require__(44)
+	  : __webpack_require__(45)
+
+/***/ },
+/* 44 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	/**
+	 * Add class `name` if not already present.
+	 *
+	 * @param {String} name
+	 * @param {Element} el
+	 * @api public
+	 */
+	
+	exports.add = function(name, el){
+		el.classList.add(name)
+	}
+	
+	/**
+	 * Remove `name` if present
+	 *
+	 * @param {String|RegExp} name
+	 * @param {Element} el
+	 * @api public
+	 */
+	
+	exports.remove = function(name, el){
+		if (name instanceof RegExp) {
+			return exports.removeMatching(name, el)
+		}
+		el.classList.remove(name)
+	}
+	
+	/**
+	 * Remove all classes matching `re`.
+	 *
+	 * @param {RegExp} re
+	 * @param {Element} el
+	 * @api public
+	 */
+	
+	exports.removeMatching = function(re, el){
+		var arr = exports.array(el)
+		for (var i = 0; i < arr.length; i++) {
+			if (re.test(arr[i])) el.classList.remove(arr[i])
+		}
+	}
+	
+	/**
+	 * Toggle class `name`.
+	 *
+	 * @param {String} name
+	 * @param {Element} el
+	 * @api public
+	 */
+	
+	exports.toggle = function(name, el){
+		el.classList.toggle(name)
+	}
+	
+	/**
+	 * Return an array of classes.
+	 *
+	 * @param {Element} el
+	 * @return {Array}
+	 * @api public
+	 */
+	
+	exports.array = function(el){
+		return el.className.match(/([^\s]+)/g) || []
+	}
+	
+	/**
+	 * Check if class `name` is present.
+	 *
+	 * @param {String} name
+	 * @param {Element} el
+	 * @api public
+	 */
+	
+	exports.has =
+	exports.contains = function(name, el){
+		return el.classList.contains(name)
+	}
+
+/***/ },
+/* 45 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var index = __webpack_require__(46)
+	
+	exports.add = function(name, el){
+		var arr = exports.array(el)
+		if (index(arr, name) < 0) {
+			arr.push(name)
+			el.className = arr.join(' ')
+		}
+	}
+	
+	exports.remove = function(name, el){
+		if (name instanceof RegExp) {
+			return exports.removeMatching(name, el)
+		}
+		var arr = exports.array(el)
+		var i = index(arr, name)
+		if (i >= 0) {
+			arr.splice(i, 1)
+			el.className = arr.join(' ')
+		}
+	}
+	
+	exports.removeMatching = function(re, el){
+		var arr = exports.array(el)
+		for (var i = 0; i < arr.length;) {
+			if (re.test(arr[i])) arr.splice(i, 1)
+			else i++
+		}
+		el.className = arr.join(' ')
+	}
+	
+	exports.toggle = function(name, el){
+		if (exports.has(name, el)) {
+			exports.remove(name, el)
+		} else {
+			exports.add(name, el)
+		}
+	}
+	
+	exports.array = function(el){
+		return el.className.match(/([^\s]+)/g) || []
+	}
+	
+	exports.has =
+	exports.contains = function(name, el){
+		return index(exports.array(el), name) >= 0
+	}
+
+/***/ },
+/* 46 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(47);
+
+/***/ },
+/* 47 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = function(arr, obj){
+	  if (arr.indexOf) return arr.indexOf(obj);
+	  for (var i = 0; i < arr.length; ++i) {
+	    if (arr[i] === obj) return i;
+	  }
+	  return -1;
+	};
+
+/***/ },
+/* 48 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(49);
+
+/***/ },
+/* 49 */
+/***/ function(module, exports, __webpack_require__) {
+
+	
+	var bind = __webpack_require__(33).bind
+	  , indexOf = __webpack_require__(46);
+	
+	
+	/**
+	 * Expose `onEscape`.
+	 */
+	
+	module.exports = exports = onEscape;
+	
+	
+	/**
+	 * Handlers.
+	 */
+	
+	var fns = [];
+	
+	
+	/**
+	 * Escape binder.
+	 *
+	 * @param {Function} fn
+	 */
+	
+	function onEscape (fn) {
+	  fns.push(fn);
+	}
+	
+	
+	/**
+	 * Bind a handler, for symmetry.
+	 */
+	
+	exports.bind = onEscape;
+	
+	
+	/**
+	 * Unbind a handler.
+	 *
+	 * @param {Function} fn
+	 */
+	
+	exports.unbind = function (fn) {
+	  var index = indexOf(fns, fn);
+	  if (index !== -1) fns.splice(index, 1);
+	};
+	
+	
+	/**
+	 * Bind to `document` once.
+	 */
+	
+	bind(document, 'keydown', function (e) {
+	  if (27 !== e.keyCode) return;
+	  for (var i = 0, fn; fn = fns[i]; i++) fn(e);
+	});
+
+/***/ },
+/* 50 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = "<div class=\"Modal hidden\" effect=\"toggle\"></div>";
+
+/***/ },
+/* 51 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = "<div class=\"Sheet\">\n  <span class=\"Sheet-close-button\" on-click=\"hide\"></span>\n</div>";
+
+/***/ },
+/* 52 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(53);
+
+/***/ },
+/* 53 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Module dependencies.
+	 */
+	
+	var closest = __webpack_require__(54)
+	  , event = __webpack_require__(33);
+	
+	/**
+	 * Delegate event `type` to `selector`
+	 * and invoke `fn(e)`. A callback function
+	 * is returned which may be passed to `.unbind()`.
+	 *
+	 * @param {Element} el
+	 * @param {String} selector
+	 * @param {String} type
+	 * @param {Function} fn
+	 * @param {Boolean} capture
+	 * @return {Function}
+	 * @api public
+	 */
+	
+	exports.bind = function(el, selector, type, fn, capture){
+	  return event.bind(el, type, function(e){
+	    var target = e.target || e.srcElement;
+	    e.delegateTarget = closest(target, selector, true, el);
+	    if (e.delegateTarget) fn.call(el, e);
+	  }, capture);
+	};
+	
+	/**
+	 * Unbind event `type`'s callback `fn`.
+	 *
+	 * @param {Element} el
+	 * @param {String} type
+	 * @param {Function} fn
+	 * @param {Boolean} capture
+	 * @api public
+	 */
+	
+	exports.unbind = function(el, type, fn, capture){
+	  event.unbind(el, type, fn, capture);
+	};
+
+
+/***/ },
+/* 54 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(55);
+
+/***/ },
+/* 55 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var matches = __webpack_require__(56)
+	
+	module.exports = function (element, selector, checkYoSelf, root) {
+	  element = checkYoSelf ? {parentNode: element} : element
+	
+	  root = root || document
+	
+	  // Make sure `element !== document` and `element != null`
+	  // otherwise we get an illegal invocation
+	  while ((element = element.parentNode) && element !== document) {
+	    if (matches(element, selector))
+	      return element
+	    // After `matches` on the edge case that
+	    // the selector matches the root
+	    // (when the root is not the document)
+	    if (element === root)
+	      return  
+	  }
+	}
+
+/***/ },
+/* 56 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(57);
+
+/***/ },
+/* 57 */
+/***/ function(module, exports, __webpack_require__) {
+
+	/**
+	 * Module dependencies.
+	 */
+	
+	var query = __webpack_require__(3);
+	
+	/**
+	 * Element prototype.
+	 */
+	
+	var proto = Element.prototype;
+	
+	/**
+	 * Vendor function.
+	 */
+	
+	var vendor = proto.matches
+	  || proto.webkitMatchesSelector
+	  || proto.mozMatchesSelector
+	  || proto.msMatchesSelector
+	  || proto.oMatchesSelector;
+	
+	/**
+	 * Expose `match()`.
+	 */
+	
+	module.exports = match;
+	
+	/**
+	 * Match `el` to `selector`.
+	 *
+	 * @param {Element} el
+	 * @param {String} selector
+	 * @return {Boolean}
+	 * @api public
+	 */
+	
+	function match(el, selector) {
+	  if (vendor) return vendor.call(el, selector);
+	  var nodes = query.all(selector, el.parentNode);
+	  for (var i = 0; i < nodes.length; ++i) {
+	    if (nodes[i] == el) return true;
+	  }
+	  return false;
+	}
+
+
+/***/ },
+/* 58 */
+/***/ function(module, exports, __webpack_require__) {
+
+	module.exports = __webpack_require__(59);
+
+/***/ },
+/* 59 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var config      = __webpack_require__(60),
+	    ViewModel   = __webpack_require__(63),
+	    utils       = __webpack_require__(67),
 	    makeHash    = utils.hash,
 	    assetTypes  = ['directive', 'filter', 'partial', 'effect', 'component']
 	
 	// require these so Browserify can catch them
 	// so they can be used in Vue.require
-	__webpack_require__(13)
-	__webpack_require__(20)
+	__webpack_require__(66)
+	__webpack_require__(73)
 	
 	ViewModel.options = config.globalAssets = {
-	    directives  : __webpack_require__(21),
-	    filters     : __webpack_require__(31),
+	    directives  : __webpack_require__(74),
+	    filters     : __webpack_require__(84),
 	    partials    : makeHash(),
 	    effects     : makeHash(),
 	    components  : makeHash()
@@ -7388,7 +9234,7 @@
 	ViewModel.use = function (plugin) {
 	    if (typeof plugin === 'string') {
 	        try {
-	            plugin = __webpack_require__(32)(plugin)
+	            plugin = __webpack_require__(85)(plugin)
 	        } catch (e) {
 	            utils.warn('Cannot find plugin: ' + plugin)
 	            return
@@ -7411,7 +9257,7 @@
 	 *  Expose internal modules for plugins
 	 */
 	ViewModel.require = function (path) {
-	    return __webpack_require__(32)("./" + path)
+	    return __webpack_require__(85)("./" + path)
 	}
 	
 	ViewModel.extend = extend
@@ -7513,10 +9359,10 @@
 	module.exports = ViewModel
 
 /***/ },
-/* 7 */
+/* 60 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var TextParser = __webpack_require__(8)
+	var TextParser = __webpack_require__(61)
 	
 	module.exports = {
 	    prefix         : 'v',
@@ -7537,7 +9383,7 @@
 	})
 
 /***/ },
-/* 8 */
+/* 61 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var openChar        = '{',
@@ -7598,7 +9444,7 @@
 	 *  e.g.  a {{b}} c  =>  "a " + b + " c"
 	 */
 	function parseAttr (attr) {
-	    Directive = Directive || __webpack_require__(9)
+	    Directive = Directive || __webpack_require__(62)
 	    var tokens = parse(attr)
 	    if (!tokens) return null
 	    if (tokens.length === 1) return tokens[0].key
@@ -7638,7 +9484,7 @@
 	exports.delimiters    = [openChar, endChar]
 
 /***/ },
-/* 9 */
+/* 62 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var dirId           = 1,
@@ -7647,7 +9493,7 @@
 	    NESTING_RE      = /^\$(parent|root)\./,
 	    SINGLE_VAR_RE   = /^[\w\.$]+$/,
 	    QUOTE_RE        = /"/g,
-	    TextParser      = __webpack_require__(8)
+	    TextParser      = __webpack_require__(61)
 	
 	/**
 	 *  Directive class
@@ -7901,13 +9747,13 @@
 	module.exports = Directive
 
 /***/ },
-/* 10 */
+/* 63 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Compiler   = __webpack_require__(11),
-	    utils      = __webpack_require__(14),
-	    transition = __webpack_require__(20),
-	    Batcher    = __webpack_require__(17),
+	var Compiler   = __webpack_require__(64),
+	    utils      = __webpack_require__(67),
+	    transition = __webpack_require__(73),
+	    Batcher    = __webpack_require__(70),
 	    slice      = [].slice,
 	    def        = utils.defProtected,
 	    nextTick   = utils.nextTick,
@@ -8086,18 +9932,18 @@
 	module.exports = ViewModel
 
 /***/ },
-/* 11 */
+/* 64 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter     = __webpack_require__(12),
-	    Observer    = __webpack_require__(13),
-	    config      = __webpack_require__(7),
-	    utils       = __webpack_require__(14),
-	    Binding     = __webpack_require__(16),
-	    Directive   = __webpack_require__(9),
-	    TextParser  = __webpack_require__(8),
-	    DepsParser  = __webpack_require__(18),
-	    ExpParser   = __webpack_require__(19),
+	var Emitter     = __webpack_require__(65),
+	    Observer    = __webpack_require__(66),
+	    config      = __webpack_require__(60),
+	    utils       = __webpack_require__(67),
+	    Binding     = __webpack_require__(69),
+	    Directive   = __webpack_require__(62),
+	    TextParser  = __webpack_require__(61),
+	    DepsParser  = __webpack_require__(71),
+	    ExpParser   = __webpack_require__(72),
 	    ViewModel,
 	    
 	    // cache methods
@@ -9005,7 +10851,7 @@
 	CompilerProto.resolveComponent = function (node, data, test) {
 	
 	    // late require to avoid circular deps
-	    ViewModel = ViewModel || __webpack_require__(10)
+	    ViewModel = ViewModel || __webpack_require__(63)
 	
 	    var exp     = utils.attr(node, 'component'),
 	        tagName = node.tagName,
@@ -9128,7 +10974,7 @@
 	module.exports = Compiler
 
 /***/ },
-/* 12 */
+/* 65 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var slice = [].slice
@@ -9230,13 +11076,13 @@
 	module.exports = Emitter
 
 /***/ },
-/* 13 */
+/* 66 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/* jshint proto:true */
 	
-	var Emitter  = __webpack_require__(12),
-	    utils    = __webpack_require__(14),
+	var Emitter  = __webpack_require__(65),
+	    utils    = __webpack_require__(67),
 	    // cache methods
 	    def      = utils.defProtected,
 	    isObject = utils.isObject,
@@ -9681,10 +11527,10 @@
 	}
 
 /***/ },
-/* 14 */
+/* 67 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var config       = __webpack_require__(7),
+	var config       = __webpack_require__(60),
 	    toString     = ({}).toString,
 	    win          = window,
 	    console      = win.console,
@@ -9716,7 +11562,7 @@
 	    /**
 	     *  Convert a string template to a dom fragment
 	     */
-	    toFragment: __webpack_require__(15),
+	    toFragment: __webpack_require__(68),
 	
 	    /**
 	     *  get a value from an object keypath
@@ -9878,7 +11724,7 @@
 	     *  if it is not already one
 	     */
 	    toConstructor: function (obj) {
-	        ViewModel = ViewModel || __webpack_require__(10)
+	        ViewModel = ViewModel || __webpack_require__(63)
 	        return utils.isObject(obj)
 	            ? ViewModel.extend(obj)
 	            : typeof obj === 'function'
@@ -10007,7 +11853,7 @@
 	}
 
 /***/ },
-/* 15 */
+/* 68 */
 /***/ function(module, exports, __webpack_require__) {
 
 	// string -> DOM conversion
@@ -10096,10 +11942,10 @@
 	}
 
 /***/ },
-/* 16 */
+/* 69 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Batcher        = __webpack_require__(17),
+	var Batcher        = __webpack_require__(70),
 	    bindingBatcher = new Batcher(),
 	    bindingId      = 1
 	
@@ -10204,10 +12050,10 @@
 	module.exports = Binding
 
 /***/ },
-/* 17 */
+/* 70 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(14)
+	var utils = __webpack_require__(67)
 	
 	function Batcher () {
 	    this.reset()
@@ -10254,12 +12100,12 @@
 	module.exports = Batcher
 
 /***/ },
-/* 18 */
+/* 71 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var Emitter  = __webpack_require__(12),
-	    utils    = __webpack_require__(14),
-	    Observer = __webpack_require__(13),
+	var Emitter  = __webpack_require__(65),
+	    utils    = __webpack_require__(67),
+	    Observer = __webpack_require__(66),
 	    catcher  = new Emitter()
 	
 	/**
@@ -10324,10 +12170,10 @@
 	}
 
 /***/ },
-/* 19 */
+/* 72 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils           = __webpack_require__(14),
+	var utils           = __webpack_require__(67),
 	    STR_SAVE_RE     = /"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'/g,
 	    STR_RESTORE_RE  = /"(\d+)"/g,
 	    NEWLINE_RE      = /\n/g,
@@ -10519,13 +12365,13 @@
 	}
 
 /***/ },
-/* 20 */
+/* 73 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var endEvents  = sniffEndEvents(),
-	    config     = __webpack_require__(7),
+	    config     = __webpack_require__(60),
 	    // batch enter animations so we only force the layout once
-	    Batcher    = __webpack_require__(17),
+	    Batcher    = __webpack_require__(70),
 	    batcher    = new Batcher(),
 	    // cache timer functions
 	    setTO      = window.setTimeout,
@@ -10752,12 +12598,12 @@
 	transition.sniff = sniffEndEvents
 
 /***/ },
-/* 21 */
+/* 74 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils      = __webpack_require__(14),
-	    config     = __webpack_require__(7),
-	    transition = __webpack_require__(20),
+	var utils      = __webpack_require__(67),
+	    config     = __webpack_require__(60),
+	    transition = __webpack_require__(73),
 	    directives = module.exports = utils.hash()
 	
 	/**
@@ -10875,21 +12721,21 @@
 	    }
 	}
 	
-	directives.on      = __webpack_require__(22)
-	directives.repeat  = __webpack_require__(23)
-	directives.model   = __webpack_require__(24)
-	directives['if']   = __webpack_require__(25)
-	directives['with'] = __webpack_require__(26)
-	directives.html    = __webpack_require__(27)
-	directives.style   = __webpack_require__(28)
-	directives.partial = __webpack_require__(29)
-	directives.view    = __webpack_require__(30)
+	directives.on      = __webpack_require__(75)
+	directives.repeat  = __webpack_require__(76)
+	directives.model   = __webpack_require__(77)
+	directives['if']   = __webpack_require__(78)
+	directives['with'] = __webpack_require__(79)
+	directives.html    = __webpack_require__(80)
+	directives.style   = __webpack_require__(81)
+	directives.partial = __webpack_require__(82)
+	directives.view    = __webpack_require__(83)
 
 /***/ },
-/* 22 */
+/* 75 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils    = __webpack_require__(14)
+	var utils    = __webpack_require__(67)
 	
 	/**
 	 *  Binding for event listeners
@@ -10947,11 +12793,11 @@
 	}
 
 /***/ },
-/* 23 */
+/* 76 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils      = __webpack_require__(14),
-	    config     = __webpack_require__(7)
+	var utils      = __webpack_require__(67),
+	    config     = __webpack_require__(60)
 	
 	/**
 	 *  Binding that manages VMs based on an Array
@@ -11198,10 +13044,10 @@
 	}
 
 /***/ },
-/* 24 */
+/* 77 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(14),
+	var utils = __webpack_require__(67),
 	    isIE9 = navigator.userAgent.indexOf('MSIE 9.0') > 0,
 	    filter = [].filter
 	
@@ -11377,10 +13223,10 @@
 	}
 
 /***/ },
-/* 25 */
+/* 78 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils    = __webpack_require__(14)
+	var utils    = __webpack_require__(67)
 	
 	/**
 	 *  Manages a conditional child VM
@@ -11438,10 +13284,10 @@
 	}
 
 /***/ },
-/* 26 */
+/* 79 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(14)
+	var utils = __webpack_require__(67)
 	
 	/**
 	 *  Binding for inheriting data from parent VMs.
@@ -11493,10 +13339,10 @@
 	}
 
 /***/ },
-/* 27 */
+/* 80 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(14),
+	var utils = __webpack_require__(67),
 	    slice = [].slice
 	
 	/**
@@ -11539,7 +13385,7 @@
 	}
 
 /***/ },
-/* 28 */
+/* 81 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var prefixes = ['-webkit-', '-moz-', '-ms-']
@@ -11584,10 +13430,10 @@
 	}
 
 /***/ },
-/* 29 */
+/* 82 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils = __webpack_require__(14)
+	var utils = __webpack_require__(67)
 	
 	/**
 	 *  Binding for partials
@@ -11639,7 +13485,7 @@
 	}
 
 /***/ },
-/* 30 */
+/* 83 */
 /***/ function(module, exports, __webpack_require__) {
 
 	/**
@@ -11700,10 +13546,10 @@
 	}
 
 /***/ },
-/* 31 */
+/* 84 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var utils    = __webpack_require__(14),
+	var utils    = __webpack_require__(67),
 	    get      = utils.get,
 	    slice    = [].slice,
 	    QUOTE_RE = /^'.*'$/,
@@ -11895,62 +13741,62 @@
 	}
 
 /***/ },
-/* 32 */
+/* 85 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var map = {
-		"./batcher": 17,
-		"./batcher.js": 17,
-		"./binding": 16,
-		"./binding.js": 16,
-		"./compiler": 11,
-		"./compiler.js": 11,
-		"./config": 7,
-		"./config.js": 7,
-		"./deps-parser": 18,
-		"./deps-parser.js": 18,
-		"./directive": 9,
-		"./directive.js": 9,
-		"./directives/html": 27,
-		"./directives/html.js": 27,
-		"./directives/if": 25,
-		"./directives/if.js": 25,
-		"./directives/index": 21,
-		"./directives/index.js": 21,
-		"./directives/model": 24,
-		"./directives/model.js": 24,
-		"./directives/on": 22,
-		"./directives/on.js": 22,
-		"./directives/partial": 29,
-		"./directives/partial.js": 29,
-		"./directives/repeat": 23,
-		"./directives/repeat.js": 23,
-		"./directives/style": 28,
-		"./directives/style.js": 28,
-		"./directives/view": 30,
-		"./directives/view.js": 30,
-		"./directives/with": 26,
-		"./directives/with.js": 26,
-		"./emitter": 12,
-		"./emitter.js": 12,
-		"./exp-parser": 19,
-		"./exp-parser.js": 19,
-		"./filters": 31,
-		"./filters.js": 31,
-		"./fragment": 15,
-		"./fragment.js": 15,
-		"./main": 6,
-		"./main.js": 6,
-		"./observer": 13,
-		"./observer.js": 13,
-		"./text-parser": 8,
-		"./text-parser.js": 8,
-		"./transition": 20,
-		"./transition.js": 20,
-		"./utils": 14,
-		"./utils.js": 14,
-		"./viewmodel": 10,
-		"./viewmodel.js": 10
+		"./batcher": 70,
+		"./batcher.js": 70,
+		"./binding": 69,
+		"./binding.js": 69,
+		"./compiler": 64,
+		"./compiler.js": 64,
+		"./config": 60,
+		"./config.js": 60,
+		"./deps-parser": 71,
+		"./deps-parser.js": 71,
+		"./directive": 62,
+		"./directive.js": 62,
+		"./directives/html": 80,
+		"./directives/html.js": 80,
+		"./directives/if": 78,
+		"./directives/if.js": 78,
+		"./directives/index": 74,
+		"./directives/index.js": 74,
+		"./directives/model": 77,
+		"./directives/model.js": 77,
+		"./directives/on": 75,
+		"./directives/on.js": 75,
+		"./directives/partial": 82,
+		"./directives/partial.js": 82,
+		"./directives/repeat": 76,
+		"./directives/repeat.js": 76,
+		"./directives/style": 81,
+		"./directives/style.js": 81,
+		"./directives/view": 83,
+		"./directives/view.js": 83,
+		"./directives/with": 79,
+		"./directives/with.js": 79,
+		"./emitter": 65,
+		"./emitter.js": 65,
+		"./exp-parser": 72,
+		"./exp-parser.js": 72,
+		"./filters": 84,
+		"./filters.js": 84,
+		"./fragment": 68,
+		"./fragment.js": 68,
+		"./main": 59,
+		"./main.js": 59,
+		"./observer": 66,
+		"./observer.js": 66,
+		"./text-parser": 61,
+		"./text-parser.js": 61,
+		"./transition": 73,
+		"./transition.js": 73,
+		"./utils": 67,
+		"./utils.js": 67,
+		"./viewmodel": 63,
+		"./viewmodel.js": 63
 	};
 	function webpackContext(req) {
 		return __webpack_require__(webpackContextResolve(req));
@@ -11963,207 +13809,6 @@
 	};
 	webpackContext.resolve = webpackContextResolve;
 	module.exports = webpackContext;
-
-
-/***/ },
-/* 33 */
-/***/ function(module, exports, __webpack_require__) {
-
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(module) {;(function(win){
-		var store = {},
-			doc = win.document,
-			localStorageName = 'localStorage',
-			scriptTag = 'script',
-			storage
-	
-		store.disabled = false
-		store.set = function(key, value) {}
-		store.get = function(key) {}
-		store.remove = function(key) {}
-		store.clear = function() {}
-		store.transact = function(key, defaultVal, transactionFn) {
-			var val = store.get(key)
-			if (transactionFn == null) {
-				transactionFn = defaultVal
-				defaultVal = null
-			}
-			if (typeof val == 'undefined') { val = defaultVal || {} }
-			transactionFn(val)
-			store.set(key, val)
-		}
-		store.getAll = function() {}
-		store.forEach = function() {}
-	
-		store.serialize = function(value) {
-			return JSON.stringify(value)
-		}
-		store.deserialize = function(value) {
-			if (typeof value != 'string') { return undefined }
-			try { return JSON.parse(value) }
-			catch(e) { return value || undefined }
-		}
-	
-		// Functions to encapsulate questionable FireFox 3.6.13 behavior
-		// when about.config::dom.storage.enabled === false
-		// See https://github.com/marcuswestin/store.js/issues#issue/13
-		function isLocalStorageNameSupported() {
-			try { return (localStorageName in win && win[localStorageName]) }
-			catch(err) { return false }
-		}
-	
-		if (isLocalStorageNameSupported()) {
-			storage = win[localStorageName]
-			store.set = function(key, val) {
-				if (val === undefined) { return store.remove(key) }
-				storage.setItem(key, store.serialize(val))
-				return val
-			}
-			store.get = function(key) { return store.deserialize(storage.getItem(key)) }
-			store.remove = function(key) { storage.removeItem(key) }
-			store.clear = function() { storage.clear() }
-			store.getAll = function() {
-				var ret = {}
-				store.forEach(function(key, val) {
-					ret[key] = val
-				})
-				return ret
-			}
-			store.forEach = function(callback) {
-				for (var i=0; i<storage.length; i++) {
-					var key = storage.key(i)
-					callback(key, store.get(key))
-				}
-			}
-		} else if (doc.documentElement.addBehavior) {
-			var storageOwner,
-				storageContainer
-			// Since #userData storage applies only to specific paths, we need to
-			// somehow link our data to a specific path.  We choose /favicon.ico
-			// as a pretty safe option, since all browsers already make a request to
-			// this URL anyway and being a 404 will not hurt us here.  We wrap an
-			// iframe pointing to the favicon in an ActiveXObject(htmlfile) object
-			// (see: http://msdn.microsoft.com/en-us/library/aa752574(v=VS.85).aspx)
-			// since the iframe access rules appear to allow direct access and
-			// manipulation of the document element, even for a 404 page.  This
-			// document can be used instead of the current document (which would
-			// have been limited to the current path) to perform #userData storage.
-			try {
-				storageContainer = new ActiveXObject('htmlfile')
-				storageContainer.open()
-				storageContainer.write('<'+scriptTag+'>document.w=window</'+scriptTag+'><iframe src="/favicon.ico"></iframe>')
-				storageContainer.close()
-				storageOwner = storageContainer.w.frames[0].document
-				storage = storageOwner.createElement('div')
-			} catch(e) {
-				// somehow ActiveXObject instantiation failed (perhaps some special
-				// security settings or otherwse), fall back to per-path storage
-				storage = doc.createElement('div')
-				storageOwner = doc.body
-			}
-			function withIEStorage(storeFunction) {
-				return function() {
-					var args = Array.prototype.slice.call(arguments, 0)
-					args.unshift(storage)
-					// See http://msdn.microsoft.com/en-us/library/ms531081(v=VS.85).aspx
-					// and http://msdn.microsoft.com/en-us/library/ms531424(v=VS.85).aspx
-					storageOwner.appendChild(storage)
-					storage.addBehavior('#default#userData')
-					storage.load(localStorageName)
-					var result = storeFunction.apply(store, args)
-					storageOwner.removeChild(storage)
-					return result
-				}
-			}
-	
-			// In IE7, keys cannot start with a digit or contain certain chars.
-			// See https://github.com/marcuswestin/store.js/issues/40
-			// See https://github.com/marcuswestin/store.js/issues/83
-			var forbiddenCharsRegex = new RegExp("[!\"#$%&'()*+,/\\\\:;<=>?@[\\]^`{|}~]", "g")
-			function ieKeyFix(key) {
-				return key.replace(/^d/, '___$&').replace(forbiddenCharsRegex, '___')
-			}
-			store.set = withIEStorage(function(storage, key, val) {
-				key = ieKeyFix(key)
-				if (val === undefined) { return store.remove(key) }
-				storage.setAttribute(key, store.serialize(val))
-				storage.save(localStorageName)
-				return val
-			})
-			store.get = withIEStorage(function(storage, key) {
-				key = ieKeyFix(key)
-				return store.deserialize(storage.getAttribute(key))
-			})
-			store.remove = withIEStorage(function(storage, key) {
-				key = ieKeyFix(key)
-				storage.removeAttribute(key)
-				storage.save(localStorageName)
-			})
-			store.clear = withIEStorage(function(storage) {
-				var attributes = storage.XMLDocument.documentElement.attributes
-				storage.load(localStorageName)
-				for (var i=0, attr; attr=attributes[i]; i++) {
-					storage.removeAttribute(attr.name)
-				}
-				storage.save(localStorageName)
-			})
-			store.getAll = function(storage) {
-				var ret = {}
-				store.forEach(function(key, val) {
-					ret[key] = val
-				})
-				return ret
-			}
-			store.forEach = withIEStorage(function(storage, callback) {
-				var attributes = storage.XMLDocument.documentElement.attributes
-				for (var i=0, attr; attr=attributes[i]; ++i) {
-					callback(attr.name, store.deserialize(storage.getAttribute(attr.name)))
-				}
-			})
-		}
-	
-		try {
-			var testKey = '__storejs__'
-			store.set(testKey, testKey)
-			if (store.get(testKey) != testKey) { store.disabled = true }
-			store.remove(testKey)
-		} catch(e) {
-			store.disabled = true
-		}
-		store.enabled = !store.disabled
-	
-		if (typeof module != 'undefined' && module.exports && this.module !== module) { module.exports = store }
-		else if (true) { !(__WEBPACK_AMD_DEFINE_FACTORY__ = (store), (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_RESULT__ = __WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__)) : module.exports = __WEBPACK_AMD_DEFINE_FACTORY__)) }
-		else { win.store = store }
-	
-	})(Function('return this')());
-	
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)(module)))
-
-/***/ },
-/* 34 */
-/***/ function(module, exports, __webpack_require__) {
-
-	function one(selector, el) {
-	  return el.querySelector(selector);
-	}
-	
-	exports = module.exports = function(selector, el){
-	  el = el || document;
-	  return one(selector, el);
-	};
-	
-	exports.all = function(selector, el){
-	  el = el || document;
-	  return el.querySelectorAll(selector);
-	};
-	
-	exports.engine = function(obj){
-	  if (!obj.one) throw new Error('.one callback required');
-	  if (!obj.all) throw new Error('.all callback required');
-	  one = obj.one;
-	  exports.all = obj.all;
-	  return exports;
-	};
 
 
 /***/ }

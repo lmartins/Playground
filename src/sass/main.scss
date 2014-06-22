@@ -20,9 +20,7 @@ h1, h2, h3{
 }
 
 .Todos{
-  ul{
-    padding: 0;
-  }
+  padding: 0;
   .done{
     color: #ccc;
     text-decoration: line-through;
@@ -48,4 +46,21 @@ h1, h2, h3{
 .UserCard{
   padding: 1.5em;
   margin-bottom: 1.5em;
+}
+
+
+.Overlay{
+  background: hsla(0,0,0,0.2);
+}
+
+.Modal{
+  background: white;
+  padding: 1.5em;
+  ul{
+    display: block;
+  }
+}
+
+.u-hide{
+  display: none;
 }

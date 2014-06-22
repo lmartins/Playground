@@ -9,6 +9,8 @@
     "ForbesLindesay/ajax": "*",
     "yyx990803/vue": "*",
     "component/query": "*",
-    "marcuswestin/store.js": "*"
+    "marcuswestin/store.js": "*",
+    "segmentio/sheet": "*",
+    "segmentio/modal": "*"
   }
 }

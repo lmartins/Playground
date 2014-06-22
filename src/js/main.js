@@ -1,11 +1,43 @@
 'use strict';
 
 var
-  _     = require('lodash'),
-  query = require('query'),
-  store = require('store.js'),
-  Vue   = require('vue');
+  _        = require('lodash'),
+  query    = require('query'),
+  store    = require('store.js'),
+  sheet    = require('sheet'),
+  modal    = require('modal'),
+  Vue      = require('vue');
 
+var el = query('.Sidebar');
+var sidebar = sheet(el);
+
+// var button = query('.toggleSibebar');
+query('.toggleSibebar').addEventListener('click', function(e) {
+  sidebar.show();
+});
+
+var tasksModal = modal( query('.modalContent') )
+  .effect('fade-and-scale')
+  .closable()
+  .overlay();
+
+query('.toggleModal').addEventListener('click', function(e) {
+  tasksModal.show();
+  if (!window.vm2) {
+    console.log("Run");
+    window.vm2 = new Vue({
+      el: '#modalContent',
+      data: {
+        title: 'todos',
+        user: {
+          firstName: user.name
+        },
+        todos: todosList
+      }
+    });
+  }
+
+});
 
 var todosList = [
   {
@@ -21,8 +53,15 @@ var todosList = [
 ];
 
 store.set('user', { name: 'Luis', likes: 'Javascript' });
-
 var user = store.get('user');
+
+
+
+
+
+
+
+
 
 var vm = new Vue({
   el: '#todos',
