@@ -6,6 +6,9 @@
   "local": [],
   "dependencies": {
     "component/dom": "*",
-    "ForbesLindesay/ajax": "*"
+    "ForbesLindesay/ajax": "*",
+    "yyx990803/vue": "*",
+    "component/query": "*",
+    "marcuswestin/store.js": "*"
   }
 }
